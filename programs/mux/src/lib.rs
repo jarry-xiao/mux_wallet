@@ -139,8 +139,8 @@ pub mod mux {
             print_dec(ctx.accounts.recipient.lamports() - recipient_balance, 9)
         );
         wallet_state.last_snapshot = ctx.accounts.fund_wallet.lamports()
-            - wallet_state.dust
-            - wallet_state.starting_balance;
+            .saturating_sub(wallet_state.dust)
+            .saturating_sub(wallet_state.starting_balance);
         Ok(())
     }
 
@@ -164,8 +164,8 @@ pub mod mux {
             &ctx.accounts.system_program,
         )?;
         wallet_state.last_snapshot = ctx.accounts.fund_wallet.lamports()
-            - wallet_state.dust
-            - wallet_state.starting_balance;
+            .saturating_sub(wallet_state.dust)
+            .saturating_sub(wallet_state.starting_balance);
         msg!(
             "Claimed {} SOL",
             print_dec(ctx.accounts.recipient.lamports() - starting_balance, 9)
