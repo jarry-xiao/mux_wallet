@@ -21,6 +21,7 @@ pub struct WalletState {
 // Per stakeholder
 #[account]
 pub struct Stake {
+    pub fund_wallet: Pubkey,
     pub num_shares: u64,
     pub total_deposits_per_share_snapshot: u64,
 }
@@ -28,6 +29,8 @@ pub struct Stake {
 
 The high level idea is that at any given point in time, each stakeholder has the right to withdraw 
 ```
-(fund.total_deposits_per_share - stakeholder.total_deposits_per_share_snapshot) * stakeholder.num_shares
+let total = fund.total_deposits_per_share
+let snapshot = stakeholder.total_deposits_per_share_snapshot
+let amount = (total - snapshot) * stakeholder.num_shares
 ```
 As long as all funds are collected prior to any change in stake, every fund participant will have access to their fair share of the pool, and they can withdraw their allocated funds at any point in time
