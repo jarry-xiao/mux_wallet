@@ -204,7 +204,7 @@ pub struct CreateFund<'info> {
         ],
         bump,
         payer = creator,
-        space = 16 + 8,
+        space = 48 + 8,
     )]
     creator_state: Account<'info, Stake>,
     system_program: Program<'info, System>,
@@ -230,7 +230,7 @@ pub struct CreateStakeAccount<'info> {
         ],
         bump,
         payer = payer,
-        space = 16 + 8,
+        space = 48 + 8,
     )]
     user_state: Account<'info, Stake>,
     system_program: Program<'info, System>,
