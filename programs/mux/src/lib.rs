@@ -105,7 +105,11 @@ pub mod mux {
         let wallet_balance = ctx.accounts.fund_wallet.lamports();
         let wallet_state = &mut ctx.accounts.wallet_state;
         assert_with_msg(
-            wallet_balance >= wallet_state.last_snapshot,
+            wallet_balance
+                >= wallet_state
+                    .last_snapshot
+                    .saturating_add(wallet_state.dust)
+                    .saturating_add(wallet_state.starting_balance),
             ProgramError::InvalidAccountData,
             "Wallet cannot have less SOL than last snaphshot",
         )?;
@@ -138,7 +142,10 @@ pub mod mux {
             "Receiver claimed {} SOL",
             print_dec(ctx.accounts.recipient.lamports() - recipient_balance, 9)
         );
-        wallet_state.last_snapshot = ctx.accounts.fund_wallet.lamports()
+        wallet_state.last_snapshot = ctx
+            .accounts
+            .fund_wallet
+            .lamports()
             .saturating_sub(wallet_state.dust)
             .saturating_sub(wallet_state.starting_balance);
         Ok(())
@@ -150,7 +157,11 @@ pub mod mux {
         let wallet_state = &mut ctx.accounts.wallet_state;
         let recipient_state = &mut ctx.accounts.recipient_state;
         assert_with_msg(
-            wallet_balance >= wallet_state.last_snapshot,
+            wallet_balance
+                >= wallet_state
+                    .last_snapshot
+                    .saturating_add(wallet_state.dust)
+                    .saturating_add(wallet_state.starting_balance),
             ProgramError::InvalidAccountData,
             "Wallet cannot have less SOL than last snaphshot",
         )?;
@@ -163,7 +174,10 @@ pub mod mux {
             &ctx.accounts.recipient,
             &ctx.accounts.system_program,
         )?;
-        wallet_state.last_snapshot = ctx.accounts.fund_wallet.lamports()
+        wallet_state.last_snapshot = ctx
+            .accounts
+            .fund_wallet
+            .lamports()
             .saturating_sub(wallet_state.dust)
             .saturating_sub(wallet_state.starting_balance);
         msg!(
@@ -263,7 +277,7 @@ pub struct TransferShares<'info> {
             sender.key().as_ref()
         ],
         bump,
-        constraint = sender_state.num_shares > 0, 
+        constraint = sender_state.num_shares > 0,
     )]
     sender_state: Account<'info, Stake>,
     #[account(
@@ -370,8 +384,11 @@ impl WalletState {
             "Wallet Balance (minus rent): {}",
             print_dec(wallet_balance - self.starting_balance, 9)
         );
-        let new_deposits =
-            wallet_balance.saturating_sub(self.last_snapshot + self.dust + self.starting_balance);
+        let new_deposits = wallet_balance.saturating_sub(
+            self.last_snapshot
+                .saturating_add(self.dust)
+                .saturating_add(self.starting_balance),
+        );
         msg!("New Deposits: {}", print_dec(new_deposits, 9));
         msg!("Current Dust: {}", self.dust);
         if new_deposits > 0 {
