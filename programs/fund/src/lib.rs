@@ -312,9 +312,9 @@ pub struct Claim<'info> {
     recipient_state: Account<'info, Stake>,
     system_program: Program<'info, System>,
 }
-
 #[account]
 pub struct Stake {
+    pub fund_wallet: Pubkey,
     pub num_shares: u64,
     pub total_deposits_per_share_snapshot: u64,
 }
